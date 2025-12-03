@@ -40,3 +40,5 @@ desktop/linux
 desktop/linux/*
 desktop/android
 desktop/android/*
+.idea/*
+.idea
