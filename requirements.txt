@@ -1,0 +1,4 @@
+git+https://github.com/Simba-Avionic/someipy.git
+asyncio
+logging
+typing
