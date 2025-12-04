@@ -1,0 +1,9 @@
+[submodule "someip"]
+	path = someip
+	url = git@github.com:Simba-Avionic/system_definition.git
+[submodule "system_definition/someip"]
+	path = system_definition/someip
+	url = git@github.com:Simba-Avionic/system_definition.git
+[submodule "system_definition"]
+	path = system_definition
+	url = https://github.com/Simba-Avionic/system_definition.git
