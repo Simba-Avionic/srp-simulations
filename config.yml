@@ -1,1 +1,4 @@
----
+interface_ip: 0.0.0.0
+multicast_group: 224.224.224.245
+next_port: 10281
+sd_port: 30490
