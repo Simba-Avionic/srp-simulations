@@ -24,9 +24,9 @@ class EnvApp:
         return cls._instance
 
     def __init__(self, service_discovery):
-        if hasattr(self, 'initialized') and self.initialized:
+        if hasattr(self, "initialized") and self.initialized:
             return
-            
+
         self.service_discovery = service_discovery
         self.instance = None
         self.initialized = True
@@ -39,10 +39,10 @@ class EnvApp:
         msg = newTempEvent_1Out()
         msg.from_json(data_value)
         logger.debug(f"Sending newTempEvent_1: {data_value}")
-        
+
         self.instance.send_event(
-            event_group_id=32769, 
-            event_id=32769, 
+            event_group_id=32769,
+            event_id=32769,
             payload=msg.serialize()
         )
 
@@ -54,10 +54,10 @@ class EnvApp:
         msg = newTempEvent_2Out()
         msg.from_json(data_value)
         logger.debug(f"Sending newTempEvent_2: {data_value}")
-        
+
         self.instance.send_event(
-            event_group_id=32770, 
-            event_id=32770, 
+            event_group_id=32769,
+            event_id=32770,
             payload=msg.serialize()
         )
 
@@ -69,10 +69,10 @@ class EnvApp:
         msg = newTempEvent_3Out()
         msg.from_json(data_value)
         logger.debug(f"Sending newTempEvent_3: {data_value}")
-        
+
         self.instance.send_event(
-            event_group_id=32771, 
-            event_id=32771, 
+            event_group_id=32769,
+            event_id=32771,
             payload=msg.serialize()
         )
 
@@ -84,21 +84,22 @@ class EnvApp:
         msg = newPressEventOut()
         msg.from_json(data_value)
         logger.debug(f"Sending newPressEvent: {data_value}")
-        
+
         self.instance.send_event(
-            event_group_id=32772, 
-            event_id=32772, 
+            event_group_id=32769,
+            event_id=32772,
             payload=msg.serialize()
         )
 
     async def init_service(self):
-        if self.instance: 
+        if self.instance:
             return
-    
+
         event_group = EventGroup(
-            id=32769, 
+            id=32769,
             event_ids=[32769, 32770, 32771, 32772]
         )
+
         service_def = (
             ServiceBuilder()
             .with_service_id(514)
@@ -110,16 +111,16 @@ class EnvApp:
         self.instance = await construct_server_service_instance(
             service=service_def,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10127),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10136),
             ttl=255,
             sd_sender=self.service_discovery,
             cyclic_offer_delay_ms=2000,
             protocol=TransportLayerProtocol.UDP,
         )
-        
+
         self.service_discovery.attach(self.instance)
         self.instance.start_offer()
-        logger.info(f"EnvApp Server Started on port 10127")
+        logger.info(f"EnvApp Server Started on port 10136")
 
     async def shutdown(self):
         if self.instance:

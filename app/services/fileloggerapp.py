@@ -21,9 +21,9 @@ class FileLoggerApp:
         return cls._instance
 
     def __init__(self, service_discovery):
-        if hasattr(self, 'initialized') and self.initialized:
+        if hasattr(self, "initialized") and self.initialized:
             return
-            
+
         self.service_discovery = service_discovery
         self.instance = None
         self.initialized = True
@@ -36,21 +36,22 @@ class FileLoggerApp:
         msg = LoggingStateOut()
         msg.from_json(data_value)
         logger.debug(f"Sending LoggingState: {data_value}")
-        
+
         self.instance.send_event(
-            event_group_id=32769, 
-            event_id=32769, 
+            event_group_id=32769,
+            event_id=32769,
             payload=msg.serialize()
         )
 
     async def init_service(self):
-        if self.instance: 
+        if self.instance:
             return
-    
+
         event_group = EventGroup(
-            id=32769, 
+            id=32769,
             event_ids=[32769]
         )
+
         service_def = (
             ServiceBuilder()
             .with_service_id(517)
@@ -62,16 +63,16 @@ class FileLoggerApp:
         self.instance = await construct_server_service_instance(
             service=service_def,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10129),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10138),
             ttl=255,
             sd_sender=self.service_discovery,
             cyclic_offer_delay_ms=2000,
             protocol=TransportLayerProtocol.UDP,
         )
-        
+
         self.service_discovery.attach(self.instance)
         self.instance.start_offer()
-        logger.info(f"FileLoggerApp Server Started on port 10129")
+        logger.info(f"FileLoggerApp Server Started on port 10138")
 
     async def shutdown(self):
         if self.instance:
