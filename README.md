@@ -3,7 +3,7 @@
 Only supports SOME/IP events
 
 # Providing input
-In root folder as input.csv. (case sensitive)
+In root folder as input.json. (case sensitive)
 Format:
 service, event, value, seconds_after_start
 
@@ -31,7 +31,8 @@ e.g.
 }
 
 
-See sample input in input.csv
+See sample input in input.json
+
 
 # Generating services
 1. Verify that paths in the scripts are correct
