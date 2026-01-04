@@ -1,4 +1,4 @@
-.PHONY: build-dataclasses build-services build install-requirements
+.PHONY: build-dataclasses build-services build install-requirements run
 
 build: install-requirements build-dataclasses build-services
 
@@ -10,3 +10,6 @@ build-dataclasses:
 
 build-services:
 	python3 -m parsers.json_to_service
+
+run: 
+	python3 -m app.main
