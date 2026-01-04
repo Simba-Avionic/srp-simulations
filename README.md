@@ -8,6 +8,7 @@ Format:
 service, event, value, seconds_after_start
 
 e.g.
+```
 {
   "EnvApp": [
     {
@@ -29,7 +30,7 @@ e.g.
     }
   ]
 }
-
+```
 
 See sample input in input.json
 
