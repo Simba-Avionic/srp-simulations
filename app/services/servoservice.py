@@ -23,9 +23,9 @@ class ServoService:
         return cls._instance
 
     def __init__(self, service_discovery):
-        if hasattr(self, 'initialized') and self.initialized:
+        if hasattr(self, "initialized") and self.initialized:
             return
-            
+
         self.service_discovery = service_discovery
         self.instance = None
         self.initialized = True
@@ -38,10 +38,10 @@ class ServoService:
         msg = ServoStatusEventOut()
         msg.from_json(data_value)
         logger.debug(f"Sending ServoStatusEvent: {data_value}")
-        
+
         self.instance.send_event(
-            event_group_id=32769, 
-            event_id=32769, 
+            event_group_id=32769,
+            event_id=32769,
             payload=msg.serialize()
         )
 
@@ -53,10 +53,10 @@ class ServoService:
         msg = ServoVentStatusEventOut()
         msg.from_json(data_value)
         logger.debug(f"Sending ServoVentStatusEvent: {data_value}")
-        
+
         self.instance.send_event(
-            event_group_id=32770, 
-            event_id=32770, 
+            event_group_id=32769,
+            event_id=32770,
             payload=msg.serialize()
         )
 
@@ -68,21 +68,22 @@ class ServoService:
         msg = ServoDumpStatusEventOut()
         msg.from_json(data_value)
         logger.debug(f"Sending ServoDumpStatusEvent: {data_value}")
-        
+
         self.instance.send_event(
-            event_group_id=32771, 
-            event_id=32771, 
+            event_group_id=32769,
+            event_id=32771,
             payload=msg.serialize()
         )
 
     async def init_service(self):
-        if self.instance: 
+        if self.instance:
             return
-    
+
         event_group = EventGroup(
-            id=32769, 
+            id=32769,
             event_ids=[32769, 32770, 32771]
         )
+
         service_def = (
             ServiceBuilder()
             .with_service_id(515)
@@ -94,16 +95,16 @@ class ServoService:
         self.instance = await construct_server_service_instance(
             service=service_def,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10130),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10139),
             ttl=255,
             sd_sender=self.service_discovery,
             cyclic_offer_delay_ms=2000,
             protocol=TransportLayerProtocol.UDP,
         )
-        
+
         self.service_discovery.attach(self.instance)
         self.instance.start_offer()
-        logger.info(f"ServoService Server Started on port 10130")
+        logger.info(f"ServoService Server Started on port 10139")
 
     async def shutdown(self):
         if self.instance:

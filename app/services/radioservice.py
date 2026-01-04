@@ -20,17 +20,17 @@ class RadioService:
         return cls._instance
 
     def __init__(self, service_discovery):
-        if hasattr(self, 'initialized') and self.initialized:
+        if hasattr(self, "initialized") and self.initialized:
             return
-            
+
         self.service_discovery = service_discovery
         self.instance = None
         self.initialized = True
 
     async def init_service(self):
-        if self.instance: 
+        if self.instance:
             return
-    
+
         service_def = (
             ServiceBuilder()
             .with_service_id(530)
@@ -41,16 +41,16 @@ class RadioService:
         self.instance = await construct_server_service_instance(
             service=service_def,
             instance_id=1,
-            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10132),
+            endpoint=(ipaddress.IPv4Address(INTERFACE_IP), 10141),
             ttl=255,
             sd_sender=self.service_discovery,
             cyclic_offer_delay_ms=2000,
             protocol=TransportLayerProtocol.UDP,
         )
-        
+
         self.service_discovery.attach(self.instance)
         self.instance.start_offer()
-        logger.info(f"RadioService Server Started on port 10132")
+        logger.info(f"RadioService Server Started on port 10141")
 
     async def shutdown(self):
         if self.instance:

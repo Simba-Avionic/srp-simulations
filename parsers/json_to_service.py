@@ -6,12 +6,14 @@ from . import settings
 
 BASE_OUTPUT_DIR = (Path(__file__).resolve().parent / "../app/services").resolve()
 
+
 def load_json(path: Path) -> Dict[str, Any]:
     with path.open("r") as f:
         return json.load(f)
 
+
 def generate_server_code(parsed_config: Dict[str, Any], ttl=255) -> tuple[str, str]:
-    services = parsed_config['someip']
+    services = parsed_config["someip"]
     service_name = ""
 
     service_code = f"""
@@ -28,11 +30,15 @@ from someipy import (
 from parsers.settings import INTERFACE_IP
 """
 
+    # --- imports ---
     for s_name, service_config in services.items():
         service_name = s_name
-        for event_name in service_config.get('events', {}).keys():
-            service_code += f"from app.dataclasses.{s_name.lower()}_dataclass import {event_name}Out\n"
+        for event_name in service_config.get("events", {}).keys():
+            service_code += (
+                f"from app.dataclasses.{s_name.lower()}_dataclass import {event_name}Out\n"
+            )
 
+    # --- class header ---
     service_code += f"""
 class {service_name}:
     _instance = None
@@ -43,19 +49,23 @@ class {service_name}:
         return cls._instance
 
     def __init__(self, service_discovery):
-        if hasattr(self, 'initialized') and self.initialized:
+        if hasattr(self, "initialized") and self.initialized:
             return
-            
+
         self.service_discovery = service_discovery
         self.instance = None
         self.initialized = True
 """
 
+    # --- compute event group once ---
     for s_name, service_config in services.items():
-        for event_name, event_config in service_config.get('events', {}).items():
-            event_id = event_config['id']
-            group_id = event_id
-            
+        events = service_config.get("events", {})
+        event_group_id = next(iter(events.values()))["id"] if events else None
+
+        # --- send_* methods ---
+        for event_name, event_config in events.items():
+            event_id = event_config["id"]
+
             service_code += f"""
     def send_{event_name.lower()}(self, data_value):
         if not self.instance:
@@ -65,39 +75,42 @@ class {service_name}:
         msg = {event_name}Out()
         msg.from_json(data_value)
         logger.debug(f"Sending {event_name}: {{data_value}}")
-        
+
         self.instance.send_event(
-            event_group_id={group_id}, 
-            event_id={event_id}, 
+            event_group_id={event_group_id},
+            event_id={event_id},
             payload=msg.serialize()
         )
 """
 
-    service_code += f"""
+    # --- init_service ---
+    service_code += """
     async def init_service(self):
-        if self.instance: 
+        if self.instance:
             return
-    """
+"""
 
     for s_name, service_config in services.items():
-        event_ids = [e['id'] for e in service_config.get('events', {}).values()]
+        events = service_config.get("events", {})
+        event_ids = [e["id"] for e in events.values()]
+        event_group_id = event_ids[0] if event_ids else None
+
         if event_ids:
-            group_id = event_ids[0]
             service_code += f"""
         event_group = EventGroup(
-            id={group_id}, 
+            id={event_group_id},
             event_ids={event_ids}
-        )"""
+        )
+"""
 
-    for s_name, service_config in services.items():
         service_code += f"""
         service_def = (
             ServiceBuilder()
-            .with_service_id({service_config['service_id']})
-            .with_major_version({service_config['major_version']})"""
+            .with_service_id({service_config["service_id"]})
+            .with_major_version({service_config["major_version"]})"""
 
-        if any(service_config.get('events', {})):
-             service_code += f"""
+        if event_ids:
+            service_code += """
             .with_eventgroup(event_group)"""
 
         service_code += f"""
@@ -113,13 +126,14 @@ class {service_name}:
             cyclic_offer_delay_ms=2000,
             protocol=TransportLayerProtocol.UDP,
         )
-        
+
         self.service_discovery.attach(self.instance)
         self.instance.start_offer()
         logger.info(f"{service_name} Server Started on port {settings.NEXT_PORT}")
 """
         increment_port()
 
+    # --- shutdown ---
     service_code += """
     async def shutdown(self):
         if self.instance:
@@ -128,6 +142,7 @@ class {service_name}:
             logger.info("Service Stopped")
 """
 
+    # --- initializer ---
     service_code += f"""
 async def initialize_{service_name.lower()}(sd):
     service_manager = {service_name}(sd)
@@ -142,10 +157,11 @@ async def initialize_{service_name.lower()}(sd):
 
     return service_code, service_name
 
+
 def process_directory(directory_path: Path):
     BASE_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     print("Generating EVENT-ONLY SERVER manager files...")
-    
+
     for file in directory_path.rglob("*.json"):
         if file.name.endswith("data_type.json"):
             continue
@@ -158,5 +174,8 @@ def process_directory(directory_path: Path):
         output_path.write_text(code)
         print(f"Generated: {output_path}")
 
+
 if __name__ == "__main__":
-    process_directory(Path("/home/krzysztof/projects/srp-simulations/system_definition/someip/"))
+    process_directory(
+        Path("/home/krzysztof/projects/srp-simulations/system_definition/someip/")
+    )
