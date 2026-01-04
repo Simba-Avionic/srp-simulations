@@ -9,4 +9,4 @@ build-dataclasses:
 	python3 -m parsers.json_to_dataclass
 
 build-services:
-	python3 -m parsers.json_to_service_class
+	python3 -m parsers.json_to_service
