@@ -1,0 +1,33 @@
+{
+  "EnvApp": [
+    {
+      "event": "newTempEvent_3",
+      "value": 72,
+      "seconds_after_start": 3
+    },
+    {
+      "event": "newTempEvent_1",
+      "value": 35,
+      "seconds_after_start": 1
+    }
+  ],
+  "EngineService": [
+    {
+      "event": "currentmode",
+      "value": 2,
+      "seconds_after_start": 2
+    }
+  ],
+
+  "GPSService": [
+    {
+      "event": "GPSStatusEvent",
+      "value": {
+        "latitude": 52.2297,
+        "longitude": 21.0122,
+        "altitude": 100.5
+      },
+      "seconds_after_start": 7
+    }
+  ]
+}
